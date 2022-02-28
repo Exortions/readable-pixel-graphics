@@ -86,6 +86,47 @@ function read(file) {
                         }
                     }
                 }
+            } else if (command.name == 'FG') {
+                let x1 = Number(command.args[0]);
+                let y1 = Number(command.args[1]);
+                let x2 = Number(command.args[2]);
+                let y2 = Number(command.args[3]);
+                let r1 = Number(command.args[4]);
+                let g1 = Number(command.args[5]);
+                let b1 = Number(command.args[6]);
+                let r2 = Number(command.args[7]);
+                let g2 = Number(command.args[8]);
+                let b2 = Number(command.args[9]);
+
+                let x_min = Math.min(x1, x2);
+                let x_max = Math.max(x1, x2);
+                let y_min = Math.min(y1, y2);
+                let y_max = Math.max(y1, y2);
+
+                let x_diff = x2 - x1;
+                let y_diff = y2 - y1;
+
+                let r_diff = r2 - r1;
+                let g_diff = g2 - g1;
+                let b_diff = b2 - b1;
+
+                for (let x = x_min; x <= x_max; x++) {
+                    for (let y = y_min; y <= y_max; y++) {
+                        positions[y * width + x] = [
+                            x,
+                            y,
+                            Math.floor(
+                                r1 + r_diff * (x - x1) / x_diff + 0.5
+                            ),
+                            Math.floor(
+                                g1 + g_diff * (x - x1) / x_diff + 0.5
+                            ),
+                            Math.floor(
+                                b1 + b_diff * (x - x1) / x_diff + 0.5
+                            ),
+                        ];
+                    }
+                }
             } else if (command.name == "--DEFAULT-COLOR") {
                 if (command.args[0] == "--TRANSPARENT") {
                     default_color = "transparent";
