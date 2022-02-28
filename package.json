@@ -1,0 +1,41 @@
+{
+  "name": "readable-pixel-graphics",
+  "version": "1.0.0",
+  "description": "A readable image format, and a CLI to compile it on the fly.",
+  "main": "src/index.js",
+  "bin": {
+    "rpg": "bin/rpg",
+    "readable-pixel-graphics": "bin/readable-pixel-graphics"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node src/compiler.js"
+  },
+  "keywords": [
+    "cli",
+    "image",
+    "format",
+    "image-format",
+    "readable",
+    "pixel",
+    "graphics",
+    "pixel-graphics",
+    "readable-pixel-graphics"
+  ],
+  "files": [
+    "src",
+    "bin",
+    "img"
+  ],
+  "author": "Exortions",
+  "license": "MIT",
+  "dependencies": {
+    "arg": "^5.0.1",
+    "esm": "^3.2.25",
+    "inquirer": "^8.2.0",
+    "jimp": "^0.16.1",
+    "pngjs": "^6.0.0"
+  }
+}
