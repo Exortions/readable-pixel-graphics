@@ -62,6 +62,30 @@ function read(file) {
                         positions[y * width + x] = [x, y, r, g, b];
                     }
                 }
+            } else if (command.name == "C") {
+                let x = Number(command.args[0]);
+                let y = Number(command.args[1]);
+                let radius = Number(command.args[2]);
+                let r = Number(command.args[3]);
+                let g = Number(command.args[4]);
+                let b = Number(command.args[5]);
+
+                for (let x_ = x - radius; x_ <= x + radius; x_++) {
+                    for (let y_ = y - radius; y_ <= y + radius; y_++) {
+                        if (
+                            (x_ - x) ** 2 + (y_ - y) ** 2 <=
+                            radius ** 2
+                        ) {
+                            positions[y_ * width + x_] = [
+                                x_,
+                                y_,
+                                r,
+                                g,
+                                b,
+                            ];
+                        }
+                    }
+                }
             } else if (command.name == "--DEFAULT-COLOR") {
                 if (command.args[0] == "--TRANSPARENT") {
                     default_color = "transparent";
