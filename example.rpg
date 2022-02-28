@@ -1,0 +1,7 @@
+--DEFAULT-COLOR 0 0 0 Since this is cascading, this won't be applied as we set the default color to --TRANSPARENT in the next line.
+--DEFAULT-COLOR --TRANSPARENT Sets the default color to transparent.
+// This is a comment - it won't do anything.
+W 100 
+H 100 This marks the height of the image.
+D 0 0 255 255 255 You can add anything after, it is treated as a comment.
+F 2 2 10 10 255 255 255
