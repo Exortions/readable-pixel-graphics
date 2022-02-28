@@ -44,22 +44,22 @@ function read(file) {
                 let b = Number(command.args[4]);
                 positions[y * width + x] = [x, y, r, g, b];
             } else if (command.name == "F") {
-                let x = Number(command.args[0]);
-                let y = Number(command.args[1]);
-                let x1 = Number(command.args[2]);
-                let y1 = Number(command.args[3]);
+                let x1 = Number(command.args[0]);
+                let y1 = Number(command.args[1]);
+                let x2 = Number(command.args[2]);
+                let y2 = Number(command.args[3]);
                 let r = Number(command.args[4]);
                 let g = Number(command.args[5]);
                 let b = Number(command.args[6]);
 
-                let x_min = Math.min(x, x1);
-                let x_max = Math.max(x, x1);
-                let y_min = Math.min(y, y1);
-                let y_max = Math.max(y, y1);
+                let x_min = Math.min(x1, x2);
+                let x_max = Math.max(x1, x2);
+                let y_min = Math.min(y1, y2);
+                let y_max = Math.max(y1, y2);
 
-                for (let i = x_min; i <= x_max; i++) {
-                    for (let j = y_min; j <= y_max; j++) {
-                        positions[j * width + i] = [i, j, r, g, b];
+                for (let x = x_min; x <= x_max; x++) {
+                    for (let y = y_min; y <= y_max; y++) {
+                        positions[y * width + x] = [x, y, r, g, b];
                     }
                 }
             } else if (command.name == "--DEFAULT-COLOR") {
@@ -269,6 +269,8 @@ function compile(file, output) {
 
     writePng(output, width, height, pixels);
 }
+
+read('example.rpg');
 
 module.exports = {
     read,
