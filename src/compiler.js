@@ -34,6 +34,31 @@ function drawLine(positions, x1, y1, x2, y2, r, g, b, width) {
     }
 }
 
+function getPixelsOnLine(x1, y1, x2, y2, width) {
+    // Return the x and y value of all pixels on the line
+    let dx = Math.abs(x2 - x1);
+    let dy = Math.abs(y2 - y1);
+    let sx = (x1 < x2) ? 1 : -1;
+    let sy = (y1 < y2) ? 1 : -1;
+    let err = dx - dy;
+    let pixels = [];
+
+    while (true) {
+        pixels.push([x1, y1]);
+        if (x1 == x2 && y1 == y2) break;
+        let e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+    return pixels;
+}
+
 function read(file) {
     let lines;
 
@@ -43,6 +68,10 @@ function read(file) {
     let positions;
 
     if (!file.endsWith(".rpg")) return;
+
+    const checkPositions = () => {
+        if (!positions && width && height) positions = new Array(width * height);
+    }
 
     fs.readFile(file, "utf8", (err, data) => {
         if (err) throw err;
@@ -58,7 +87,8 @@ function read(file) {
             } else if (command.name == "H") {
                 height = Number(command.args[0]);
             } else if (command.name == "D") {
-                if (!positions) positions = new Array(width * height);
+                checkPositions();
+
                 let x = Number(command.args[0]);
                 let y = Number(command.args[1]);
                 let r = Number(command.args[2]);
@@ -66,6 +96,8 @@ function read(file) {
                 let b = Number(command.args[4]);
                 positions[y * width + x] = [x, y, r, g, b];
             } else if (command.name == "F") {
+                checkPositions();
+
                 let x1 = Number(command.args[0]);
                 let y1 = Number(command.args[1]);
                 let x2 = Number(command.args[2]);
@@ -85,6 +117,8 @@ function read(file) {
                     }
                 }
             } else if (command.name == "C") {
+                checkPositions();
+
                 let x = Number(command.args[0]);
                 let y = Number(command.args[1]);
                 let radius = Number(command.args[2]);
@@ -109,14 +143,7 @@ function read(file) {
                     }
                 }
             } else if (command.name == 'FG') {
-                // Add a fill gradient, first and second argument is the direction. for example: top-left bottom-right
-                // Example syntax: FG top-left bottom-right 0 0 200 0 0 255
-                // The above will fill linearly from the top left to the bottom right from 0 0 200 to 0 0 255
-                // First location is the first argument, second location is the second argument
-                // Third and fourth arguments are the starting location, fifth and sixth are the ending location
-                // The seventh, eighth, ninth and tenth arguments are the starting color, fifth and sixth are the ending color
-                // First argument is first location
-                // Second argument is second location
+                checkPositions();
 
                 let starting_location = command.args[0];
                 let ending_location = command.args[1];
@@ -130,9 +157,6 @@ function read(file) {
                 let r2 = Number(command.args[9]);
                 let g2 = Number(command.args[10]);
                 let b2 = Number(command.args[11]);
-
-                // Parse the location of the gradient, then calculate the gradient and fill the pixels into the positions array
-                // All possible locations: top-left, top-right, bottom-left, bottom-right, center, top, bottom, left, right
 
                 if (starting_location == "top-left") {
                     for (let x = x1; x <= x2; x++) {
@@ -226,8 +250,8 @@ function read(file) {
                     }
                 }
             } else if (command.name == "L") {
-                // Draw a line between two points
-                // Example: L 0 0 5 5 255 255 255
+                checkPositions();
+
                 let x1 = parseInt(command.args[0]);
                 let y1 = parseInt(command.args[1]);
                 let x2 = parseInt(command.args[2]);
@@ -238,6 +262,8 @@ function read(file) {
 
                 drawLine(positions, x1, y1, x2, y2, r, g, b, width);
             } else if (command.name == "T") {
+                checkPositions();
+
                 let x1 = parseInt(command.args[0]);
                 let y1 = parseInt(command.args[1]);
                 let x2 = parseInt(command.args[2]);
@@ -253,6 +279,16 @@ function read(file) {
                 drawLine(positions, x3, y3, x1, y1, r, g, b, width);
 
                 if (command.args[9] == "--fill") {
+                    let pixels = [];
+
+                    let pixels_on_line_1 = getPixelsOnLine(x1, y1, x2, y2);
+                    let pixels_on_line_2 = getPixelsOnLine(x2, y2, x3, y3);
+                    let pixels_on_line_3 = getPixelsOnLine(x3, y3, x1, y1);
+
+                    for (let i = 0; i < pixels_on_line_1.length; i++) pixels.push(pixels_on_line_1[i]);
+                    for (let i = 0; i < pixels_on_line_2.length; i++) pixels.push(pixels_on_line_2[i]);
+                    for (let i = 0; i < pixels_on_line_3.length; i++) pixels.push(pixels_on_line_3[i]);
+
                     let inside = [];
                     let x_min = Math.min(x1, x2, x3);
                     let x_max = Math.max(x1, x2, x3);
@@ -269,20 +305,25 @@ function read(file) {
                                 return d * e >= 0 && e * f >= 0;
                             };
                             const inside_triangle_result = inside_triangle(x, y, x1, y1, x2, y2, x3, y3);
-                            if (inside_triangle_result) {
+                            if (inside_triangle_result && !pixels.includes[[x, y]] && pixels.find(p => p[0] == x && p[1] == y) == undefined) {
+                                console.log('push ', [x, y],);
                                 inside.push([x, y]);
                             }
                         }
                     }
 
-                    console.log(inside);
+                    if (command.args[10] != undefined && command.args[11] != undefined && command.args[12] != undefined) {
+                        r = Number(command.args[10]);
+                        g = Number(command.args[11]);
+                        b = Number(command.args[12]);
+                    }
 
                     for (let pixel of inside) {
                         positions[pixel[1] * width + pixel[0]] = [pixel[0], pixel[1], r, g, b];
                     }
                 }
             } else if (command.name == "--DEFAULT-COLOR") {
-                if (command.args[0] == "--TRANSPARENT") {
+                if (command.args[0] == "-TRANSPARENT") {
                     default_color = "transparent";
                 }
                 default_color = [
