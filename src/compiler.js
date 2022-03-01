@@ -331,7 +331,255 @@ function read(file) {
                     Number(command.args[1]),
                     Number(command.args[2]),
                 ];
-            } else if (command.name.startsWith('//')) {
+            } else if (command.name == "I") {
+                checkPositions();
+
+                let included_lines = fs.readFileSync(command.args[0], "utf8").split("\n");
+
+                included_lines.forEach(included_line => {
+                    if (included_line.length > 0) {
+
+                        let command = parseCommand(included_line);
+                        if (command.name == "D") {
+                            checkPositions();
+
+                            let x = Number(command.args[0]);
+                            let y = Number(command.args[1]);
+                            let r = Number(command.args[2]);
+                            let g = Number(command.args[3]);
+                            let b = Number(command.args[4]);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        } else if (command.name == "F") {
+                            checkPositions();
+
+                            let x1 = Number(command.args[0]);
+                            let y1 = Number(command.args[1]);
+                            let x2 = Number(command.args[2]);
+                            let y2 = Number(command.args[3]);
+                            let r = Number(command.args[4]);
+                            let g = Number(command.args[5]);
+                            let b = Number(command.args[6]);
+
+                            let x_min = Math.min(x1, x2);
+                            let x_max = Math.max(x1, x2);
+                            let y_min = Math.min(y1, y2);
+                            let y_max = Math.max(y1, y2);
+
+                            for (let x = x_min; x <= x_max; x++) {
+                                for (let y = y_min; y <= y_max; y++) {
+                                    positions[y * width + x] = [x, y, r, g, b];
+                                }
+                            }
+                        } else if (command.name == "C") {
+                            checkPositions();
+
+                            let x = Number(command.args[0]);
+                            let y = Number(command.args[1]);
+                            let radius = Number(command.args[2]);
+                            let r = Number(command.args[3]);
+                            let g = Number(command.args[4]);
+                            let b = Number(command.args[5]);
+
+                            for (let x_ = x - radius; x_ <= x + radius; x_++) {
+                                for (let y_ = y - radius; y_ <= y + radius; y_++) {
+                                    if (
+                                        (x_ - x) ** 2 + (y_ - y) ** 2 <=
+                                        radius ** 2
+                                    ) {
+                                        positions[y_ * width + x_] = [
+                                            x_,
+                                            y_,
+                                            r,
+                                            g,
+                                            b,
+                                        ];
+                                    }
+                                }
+                            }
+                        } else if (command.name == 'FG') {
+                            checkPositions();
+
+                            let starting_location = command.args[0];
+                            let ending_location = command.args[1];
+                            let x1 = Number(command.args[2]);
+                            let y1 = Number(command.args[3]);
+                            let x2 = Number(command.args[4]);
+                            let y2 = Number(command.args[5]);
+                            let r1 = Number(command.args[6]);
+                            let g1 = Number(command.args[7]);
+                            let b1 = Number(command.args[8]);
+                            let r2 = Number(command.args[9]);
+                            let g2 = Number(command.args[10]);
+                            let b2 = Number(command.args[11]);
+
+                            if (starting_location == "top-left") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "top-right") {
+                                for (let x = x1; x >= x2; x--) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "bottom-left") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y >= y2; y--) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "bottom-right") {
+                                for (let x = x1; x >= x2; x--) {
+                                    for (let y = y1; y >= y2; y--) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "center") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "top") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (x - x1) / (x2 - x1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "bottom") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y >= y2; y--) {
+                                        let gradient = (x - x1) / (x2 - x1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "left") {
+                                for (let x = x1; x <= x2; x++) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            } else if (starting_location == "right") {
+                                for (let x = x1; x >= x2; x--) {
+                                    for (let y = y1; y <= y2; y++) {
+                                        let gradient = (y - y1) / (y2 - y1);
+                                        let r = Math.floor(r1 + (r2 - r1) * gradient);
+                                        let g = Math.floor(g1 + (g2 - g1) * gradient);
+                                        let b = Math.floor(b1 + (b2 - b1) * gradient);
+                                        positions[y * width + x] = [x, y, r, g, b];
+                                    }
+                                }
+                            }
+                        } else if (command.name == "L") {
+                            checkPositions();
+
+                            let x1 = parseInt(command.args[0]);
+                            let y1 = parseInt(command.args[1]);
+                            let x2 = parseInt(command.args[2]);
+                            let y2 = parseInt(command.args[3]);
+                            let r = parseInt(command.args[4]);
+                            let g = parseInt(command.args[5]);
+                            let b = parseInt(command.args[6]);
+
+                            drawLine(positions, x1, y1, x2, y2, r, g, b, width);
+                        } else if (command.name == "T") {
+                            checkPositions();
+
+                            let x1 = parseInt(command.args[0]);
+                            let y1 = parseInt(command.args[1]);
+                            let x2 = parseInt(command.args[2]);
+                            let y2 = parseInt(command.args[3]);
+                            let x3 = parseInt(command.args[4]);
+                            let y3 = parseInt(command.args[5]);
+                            let r = parseInt(command.args[6]);
+                            let g = parseInt(command.args[7]);
+                            let b = parseInt(command.args[8]);
+
+                            drawLine(positions, x1, y1, x2, y2, r, g, b, width);
+                            drawLine(positions, x2, y2, x3, y3, r, g, b, width);
+                            drawLine(positions, x3, y3, x1, y1, r, g, b, width);
+
+                            if (command.args[9] == "--fill") {
+                                let pixels = [];
+
+                                let pixels_on_line_1 = getPixelsOnLine(x1, y1, x2, y2);
+                                let pixels_on_line_2 = getPixelsOnLine(x2, y2, x3, y3);
+                                let pixels_on_line_3 = getPixelsOnLine(x3, y3, x1, y1);
+
+                                for (let i = 0; i < pixels_on_line_1.length; i++) pixels.push(pixels_on_line_1[i]);
+                                for (let i = 0; i < pixels_on_line_2.length; i++) pixels.push(pixels_on_line_2[i]);
+                                for (let i = 0; i < pixels_on_line_3.length; i++) pixels.push(pixels_on_line_3[i]);
+
+                                let inside = [];
+                                let x_min = Math.min(x1, x2, x3);
+                                let x_max = Math.max(x1, x2, x3);
+                                let y_min = Math.min(y1, y2, y3);
+                                let y_max = Math.max(y1, y2, y3);
+
+                                for (let x = x_min; x <= x_max; x++) {
+                                    for (let y = y_min; y <= y_max; y++) {
+                                        let inside_triangle = (x, y, x1, y1, x2, y2, x3, y3) => {
+                                            let d = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+                                            let e = (x - x2) * (y3 - y2) - (y - y2) * (x3 - x2);
+                                            let f = (x - x3) * (y1 - y3) - (y - y3) * (x1 - x3);
+
+                                            return d * e >= 0 && e * f >= 0;
+                                        };
+                                        const inside_triangle_result = inside_triangle(x, y, x1, y1, x2, y2, x3, y3);
+                                        if (inside_triangle_result && !pixels.includes[[x, y]] && pixels.find(p => p[0] == x && p[1] == y) == undefined) {
+                                            console.log('push ', [x, y],);
+                                            inside.push([x, y]);
+                                        }
+                                    }
+                                }
+
+                                if (command.args[10] != undefined && command.args[11] != undefined && command.args[12] != undefined) {
+                                    r = Number(command.args[10]);
+                                    g = Number(command.args[11]);
+                                    b = Number(command.args[12]);
+                                }
+
+                                for (let pixel of inside) {
+                                    positions[pixel[1] * width + pixel[0]] = [pixel[0], pixel[1], r, g, b];
+                                }
+                            }
+                        }
+                    }
+                })
+            } else if (command.name.startsWith('//') || command.name.startsWith(' ') || command.name.startsWith('#')) {
                 // ignore comments
                 continue;
             } else {

@@ -1,5 +1,5 @@
 --DEFAULT-COLOR 0 255 0
 W 50
 H 50
-// Draw right triangle
-T 0 5 5 0 5 5 255 255 255 --fill
+// Include square.rpg
+I square.rpg
