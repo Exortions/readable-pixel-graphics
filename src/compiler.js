@@ -12,6 +12,28 @@ function parseCommand(command) {
     };
 }
 
+function drawLine(positions, x1, y1, x2, y2, r, g, b, width) {
+    let dx = Math.abs(x2 - x1);
+    let dy = Math.abs(y2 - y1);
+    let sx = (x1 < x2) ? 1 : -1;
+    let sy = (y1 < y2) ? 1 : -1;
+    let err = dx - dy;
+
+    while (true) {
+        positions[y1 * width + x1] = [x1, y1, r, g, b];
+        if (x1 == x2 && y1 == y2) break;
+        let e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+    }
+}
+
 function read(file) {
     let lines;
 
@@ -201,6 +223,62 @@ function read(file) {
                             let b = Math.floor(b1 + (b2 - b1) * gradient);
                             positions[y * width + x] = [x, y, r, g, b];
                         }
+                    }
+                }
+            } else if (command.name == "L") {
+                // Draw a line between two points
+                // Example: L 0 0 5 5 255 255 255
+                let x1 = parseInt(command.args[0]);
+                let y1 = parseInt(command.args[1]);
+                let x2 = parseInt(command.args[2]);
+                let y2 = parseInt(command.args[3]);
+                let r = parseInt(command.args[4]);
+                let g = parseInt(command.args[5]);
+                let b = parseInt(command.args[6]);
+
+                drawLine(positions, x1, y1, x2, y2, r, g, b, width);
+            } else if (command.name == "T") {
+                let x1 = parseInt(command.args[0]);
+                let y1 = parseInt(command.args[1]);
+                let x2 = parseInt(command.args[2]);
+                let y2 = parseInt(command.args[3]);
+                let x3 = parseInt(command.args[4]);
+                let y3 = parseInt(command.args[5]);
+                let r = parseInt(command.args[6]);
+                let g = parseInt(command.args[7]);
+                let b = parseInt(command.args[8]);
+
+                drawLine(positions, x1, y1, x2, y2, r, g, b, width);
+                drawLine(positions, x2, y2, x3, y3, r, g, b, width);
+                drawLine(positions, x3, y3, x1, y1, r, g, b, width);
+
+                if (command.args[9] == "--fill") {
+                    let inside = [];
+                    let x_min = Math.min(x1, x2, x3);
+                    let x_max = Math.max(x1, x2, x3);
+                    let y_min = Math.min(y1, y2, y3);
+                    let y_max = Math.max(y1, y2, y3);
+
+                    for (let x = x_min; x <= x_max; x++) {
+                        for (let y = y_min; y <= y_max; y++) {
+                            let inside_triangle = (x, y, x1, y1, x2, y2, x3, y3) => {
+                                let d = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+                                let e = (x - x2) * (y3 - y2) - (y - y2) * (x3 - x2);
+                                let f = (x - x3) * (y1 - y3) - (y - y3) * (x1 - x3);
+
+                                return d * e >= 0 && e * f >= 0;
+                            };
+                            const inside_triangle_result = inside_triangle(x, y, x1, y1, x2, y2, x3, y3);
+                            if (inside_triangle_result) {
+                                inside.push([x, y]);
+                            }
+                        }
+                    }
+
+                    console.log(inside);
+
+                    for (let pixel of inside) {
+                        positions[pixel[1] * width + pixel[0]] = [pixel[0], pixel[1], r, g, b];
                     }
                 }
             } else if (command.name == "--DEFAULT-COLOR") {
