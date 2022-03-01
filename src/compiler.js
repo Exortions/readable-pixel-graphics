@@ -87,44 +87,120 @@ function read(file) {
                     }
                 }
             } else if (command.name == 'FG') {
-                let x1 = Number(command.args[0]);
-                let y1 = Number(command.args[1]);
-                let x2 = Number(command.args[2]);
-                let y2 = Number(command.args[3]);
-                let r1 = Number(command.args[4]);
-                let g1 = Number(command.args[5]);
-                let b1 = Number(command.args[6]);
-                let r2 = Number(command.args[7]);
-                let g2 = Number(command.args[8]);
-                let b2 = Number(command.args[9]);
+                // Add a fill gradient, first and second argument is the direction. for example: top-left bottom-right
+                // Example syntax: FG top-left bottom-right 0 0 200 0 0 255
+                // The above will fill linearly from the top left to the bottom right from 0 0 200 to 0 0 255
+                // First location is the first argument, second location is the second argument
+                // Third and fourth arguments are the starting location, fifth and sixth are the ending location
+                // The seventh, eighth, ninth and tenth arguments are the starting color, fifth and sixth are the ending color
+                // First argument is first location
+                // Second argument is second location
 
-                let x_min = Math.min(x1, x2);
-                let x_max = Math.max(x1, x2);
-                let y_min = Math.min(y1, y2);
-                let y_max = Math.max(y1, y2);
+                let starting_location = command.args[0];
+                let ending_location = command.args[1];
+                let x1 = Number(command.args[2]);
+                let y1 = Number(command.args[3]);
+                let x2 = Number(command.args[4]);
+                let y2 = Number(command.args[5]);
+                let r1 = Number(command.args[6]);
+                let g1 = Number(command.args[7]);
+                let b1 = Number(command.args[8]);
+                let r2 = Number(command.args[9]);
+                let g2 = Number(command.args[10]);
+                let b2 = Number(command.args[11]);
 
-                let x_diff = x2 - x1;
-                let y_diff = y2 - y1;
+                // Parse the location of the gradient, then calculate the gradient and fill the pixels into the positions array
+                // All possible locations: top-left, top-right, bottom-left, bottom-right, center, top, bottom, left, right
 
-                let r_diff = r2 - r1;
-                let g_diff = g2 - g1;
-                let b_diff = b2 - b1;
-
-                for (let x = x_min; x <= x_max; x++) {
-                    for (let y = y_min; y <= y_max; y++) {
-                        positions[y * width + x] = [
-                            x,
-                            y,
-                            Math.floor(
-                                r1 + r_diff * (x - x1) / x_diff + 0.5
-                            ),
-                            Math.floor(
-                                g1 + g_diff * (x - x1) / x_diff + 0.5
-                            ),
-                            Math.floor(
-                                b1 + b_diff * (x - x1) / x_diff + 0.5
-                            ),
-                        ];
+                if (starting_location == "top-left") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "top-right") {
+                    for (let x = x1; x >= x2; x--) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "bottom-left") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y >= y2; y--) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "bottom-right") {
+                    for (let x = x1; x >= x2; x--) {
+                        for (let y = y1; y >= y2; y--) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "center") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "top") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (x - x1) / (x2 - x1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "bottom") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y >= y2; y--) {
+                            let gradient = (x - x1) / (x2 - x1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "left") {
+                    for (let x = x1; x <= x2; x++) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
+                    }
+                } else if (starting_location == "right") {
+                    for (let x = x1; x >= x2; x--) {
+                        for (let y = y1; y <= y2; y++) {
+                            let gradient = (y - y1) / (y2 - y1);
+                            let r = Math.floor(r1 + (r2 - r1) * gradient);
+                            let g = Math.floor(g1 + (g2 - g1) * gradient);
+                            let b = Math.floor(b1 + (b2 - b1) * gradient);
+                            positions[y * width + x] = [x, y, r, g, b];
+                        }
                     }
                 }
             } else if (command.name == "--DEFAULT-COLOR") {
